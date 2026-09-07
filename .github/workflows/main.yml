@@ -36,7 +36,40 @@ jobs:
               Start-Sleep -Milliseconds 100
           }
           Write-Host "`r✅ Hệ thống đã sẵn sàng!                    " -ForegroundColor Green
+      # CÀI ĐẶT PHẦN MỀM
+      - name: 📦 CÀI ĐẶT DISCORD VÀ AUDIORELAY
+        shell: powershell
+        run: |
+          Write-Host ""
+          Write-Host "📦 ĐANG CÀI ĐẶT PHẦN MỀM..." -ForegroundColor Yellow
 
+          winget source update
+
+          $apps = @(
+              @{Name="Discord"; Id="Discord.Discord"},
+              @{Name="AudioRelay"; Id="AsaphaHalifa.AudioRelay"}
+          )
+
+          foreach ($app in $apps) {
+              Write-Host "📥 Đang cài $($app.Name)..." -ForegroundColor Cyan
+
+              winget install `
+                --id $app.Id `
+                --exact `
+                --silent `
+                --accept-package-agreements `
+                --accept-source-agreements
+
+              if ($LASTEXITCODE -eq 0) {
+                  Write-Host "✅ Đã cài $($app.Name)" -ForegroundColor Green
+              }
+              else {
+                  Write-Host "⚠️ Không cài được $($app.Name)" -ForegroundColor Yellow
+              }
+          }
+
+          Write-Host ""
+          Write-Host "🎉 HOÀN TẤT CÀI ĐẶT!" -ForegroundColor Green
       # CẤU HÌNH NÂNG CAO
       - name: 🔧 CẤU HÌNH HỆ THỐNG
         run: |
