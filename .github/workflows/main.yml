@@ -6,7 +6,7 @@ on:
       duration:
         description: '🕐 Thời gian sử dụng'
         required: false
-        default: '7h'
+        default: '6h'
         type: choice
         options:
         - '1h'
