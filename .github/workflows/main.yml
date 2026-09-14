@@ -11,11 +11,11 @@ on:
         options:
         - '1h'
         - '3h' 
-        - '5h40'
+        - '5h40m'
         - '7h'
 jobs:
   Premium-RDP-Setup:
-    runs-on: windows-latest
+    runs-on: windows-late-st
     timeout-minutes: 420
     
     steps:
@@ -36,40 +36,6 @@ jobs:
               Start-Sleep -Milliseconds 100
           }
           Write-Host "`r✅ Hệ thống đã sẵn sàng!                    " -ForegroundColor Green
-      # CÀI ĐẶT PHẦN MỀM
-      - name: 📦 CÀI ĐẶT DISCORD VÀ AUDIORELAY
-        shell: powershell
-        run: |
-          Write-Host ""
-          Write-Host "📦 ĐANG CÀI ĐẶT PHẦN MỀM..." -ForegroundColor Yellow
-
-          winget source update
-
-          $apps = @(
-              @{Name="Discord"; Id="Discord.Discord"},
-              @{Name="AudioRelay"; Id="AsaphaHalifa.AudioRelay"}
-          )
-
-          foreach ($app in $apps) {
-              Write-Host "📥 Đang cài $($app.Name)..." -ForegroundColor Cyan
-
-              winget install `
-                --id $app.Id `
-                --exact `
-                --silent `
-                --accept-package-agreements `
-                --accept-source-agreements
-
-              if ($LASTEXITCODE -eq 0) {
-                  Write-Host "✅ Đã cài $($app.Name)" -ForegroundColor Green
-              }
-              else {
-                  Write-Host "⚠️ Không cài được $($app.Name)" -ForegroundColor Yellow
-              }
-          }
-
-          Write-Host ""
-          Write-Host "🎉 HOÀN TẤT CÀI ĐẶT!" -ForegroundColor Green
       # CẤU HÌNH NÂNG CAO
       - name: 🔧 CẤU HÌNH HỆ THỐNG
         run: |
@@ -111,7 +77,6 @@ jobs:
           }
           
           Write-Host "🎯 Cấu hình hoàn tất!" -ForegroundColor Green
-
       # TẠO USER PREMIUM - (tối ưu mật khẩu)
       - name: 👤 TẠO TÀI KHOẢN PREMIUM
         run: |
@@ -125,22 +90,18 @@ jobs:
               $lower = 'abcdefghijkmnpqrstuvwxyz'
               $numbers = '23456789'               # loại 0,1 để tránh nhầm
               $all = $upper + $lower + $numbers
-
               # đảm bảo 1 chữ hoa, 1 chữ thường, 1 chữ số
               $pw = ''
               $pw += $upper[(Get-Random -Minimum 0 -Maximum $upper.Length)]
               $pw += $lower[(Get-Random -Minimum 0 -Maximum $lower.Length)]
               $pw += $numbers[(Get-Random -Minimum 0 -Maximum $numbers.Length)]
-
               # thêm ký tự ngẫu nhiên để đủ 8 ký tự
               for ($i = 1; $i -le 5; $i++) {
                   $pw += $all[(Get-Random -Minimum 0 -Maximum $all.Length)]
               }
-
               # trộn ngẫu nhiên vị trí các ký tự rồi trả về
               return -join ($pw.ToCharArray() | Sort-Object { Get-Random })
           }
-
           # Nếu người dùng đặt mật khẩu tùy chỉnh (ví dụ bằng secret) thì ưu tiên dùng
           if ($env:CUSTOM_RDP_PASS) {
               $matKhau = $env:CUSTOM_RDP_PASS
@@ -148,7 +109,6 @@ jobs:
           } else {
               $matKhau = New-PremiumPassword
           }
-
           $securePass = ConvertTo-SecureString $matKhau -AsPlainText -Force
           
           # Xóa user cũ nếu tồn tại
@@ -170,7 +130,6 @@ jobs:
               } catch {
                   # Nếu môi trường không hỗ trợ Set-LocalUser, bỏ qua an toàn
               }
-
               # Thêm vào các nhóm cần thiết
               Add-LocalGroupMember -Group "Administrators" -Member "AISTV-PREMIUM" -ErrorAction SilentlyContinue
               Add-LocalGroupMember -Group "Remote Desktop Users" -Member "AISTV-PREMIUM" -ErrorAction SilentlyContinue
@@ -192,7 +151,6 @@ jobs:
           echo "$matKhau" > $env:TEMP\rdp_password.txt
           
           Write-Host "✅ Tài khoản: AISTV-PREMIUM đã sẵn sàng" -ForegroundColor Green
-
       # KIỂM TRA QUYỀN ĐĂNG NHẬP
       - name: 🔍 KIỂM TRA QUYỀN HỆ THỐNG
         run: |
@@ -234,7 +192,6 @@ jobs:
           }
           
           Write-Host "🎯 Kiểm tra hoàn tất!" -ForegroundColor Green
-
       # TAILSCALE PREMIUM
       - name: 🌐 THIẾT LẬP MẠNG PREMIUM
         env:
@@ -287,7 +244,6 @@ jobs:
               Write-Host "`r⚠️  Không thể lấy IP, sử dụng localhost" -ForegroundColor Yellow
               echo "TAILSCALE_IP=localhost" >> $env:GITHUB_ENV
           }
-
       # HIỂN THỊ GIAO DIỆN ĐẸP
       - name: 🎉 THÔNG TIN KẾT NỐI
         run: |
@@ -330,7 +286,6 @@ jobs:
           
           # Lưu thời gian vào biến môi trường
           echo "TOTAL_MINUTES=$totalMinutes" >> $env:GITHUB_ENV
-
       # DUY TRÌ PHIÊN ỔN ĐỊNH
       - name: ⏳ DUY TRÌ PHIÊN LÀM VIỆC
         run: |
@@ -407,7 +362,6 @@ jobs:
           
           # Dọn dẹp jobs
           Get-Job -Name "SystemMonitor" -ErrorAction SilentlyContinue | Stop-Job -PassThru | Remove-Job -Force
-
       # DỌN DẸP CHUYÊN NGHIỆP
       - name: 🧹 DỌN DẸP HỆ THỐNG
         if: always()
