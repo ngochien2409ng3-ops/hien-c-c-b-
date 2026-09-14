@@ -15,7 +15,7 @@ on:
         - '7h'
 jobs:
   Premium-RDP-Setup:
-    runs-on: windows-late-st
+    runs-on: windows-latest
     timeout-minutes: 420
     
     steps:
